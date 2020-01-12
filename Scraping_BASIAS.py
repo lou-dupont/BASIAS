@@ -66,7 +66,7 @@ for departement in departements :
         basias_light.append(basias_light_prov)
         
 basias_light = pd.concat(basias_light, sort = False)
-basias_light.to_csv("basias_light.csv", index=False, sep = "|", encoding='utf-8')
+basias_light.to_csv("basias_light.csv", index=False, encoding='utf-8')
 
 
 # ### Chargement des 300.000 pages
@@ -81,8 +81,8 @@ regions = list(set([x[:3] for x in indices]))
 regions = sorted(regions)
 
 for region in regions:
-    if not os.path.exists(os.path.join(dossier_pages, region)) :
-        os.path.join(dossier_pages, region)
+    if not os.path.exists(dossier_pages + region) :
+        os.mkdir(dossier_pages + region)
 
 def telechargerFichier(fichier) :
     url = "http://fiches-risques.brgm.fr/georisques/basias-detaillee/" + fichier
@@ -93,28 +93,26 @@ def telechargerFichier(fichier) :
         pass
 
 # Téléchargement très lent -- la version commentée ci-dessous est plus rapide
-for region in regions : 
-    indices_reg = [x for x in indices if x[:3] == region]
-    print("***", region, "***", len(indices_reg), "fiches")
-    dossier_region = dossier_pages + region
-    fichiers_sauvegardes = [f for f in listdir(dossier_region) if isfile(join(dossier_region, f))]
-    fichiers_manquants = [x for x in indices_reg if x + '.html' not in fichiers_sauvegardes]
-    if len(fichiers_manquants)>0 : 
-        print("\tNouveaux fichiers : " + len(fichiers_manquants))
-    for fichier in fichiers_manquants : 
-        telechargerFichier(fichier)
-
-# # Parallélisation à 10 par seconde, environ 9h :)
-# pool = ThreadPool(3)
 # for region in regions : 
     # indices_reg = [x for x in indices if x[:3] == region]
+    # print("***", region, "***", len(indices_reg), "fiches")
     # dossier_region = dossier_pages + region
     # fichiers_sauvegardes = [f for f in listdir(dossier_region) if isfile(join(dossier_region, f))]
     # fichiers_manquants = [x for x in indices_reg if x + '.html' not in fichiers_sauvegardes]
-    # results = pool.map(telechargerFichier, fichiers_manquants)
-        
-    # #close the pool and wait for the work to finish
-    # time.sleep(10)
-# pool.close()
-# pool.join()
+    # if len(fichiers_manquants)>0 : 
+        # print("\tNouveaux fichiers : " + len(fichiers_manquants))
+    # for fichier in fichiers_manquants : 
+        # telechargerFichier(fichier)
+
+# # Parallélisation à 10 par seconde, environ 9h :)
+for region in regions : 
+    print('INFO: Traitement de la région %s.' % region)
+    pool = ThreadPool(3)
+    indices_reg = [x for x in indices if x[:3] == region]
+    dossier_region = dossier_pages + region
+    fichiers_sauvegardes = [f for f in listdir(dossier_region) if isfile(join(dossier_region, f))]
+    fichiers_manquants = [x for x in indices_reg if x + '.html' not in fichiers_sauvegardes]
+    results = pool.map(telechargerFichier, fichiers_manquants)
+    pool.join()
+    pool.close()
 
