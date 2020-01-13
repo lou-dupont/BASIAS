@@ -12,8 +12,8 @@ dossiers_regions = os.listdir(dossier_pages)
 
 # Création du répertoire des résultats par région
 dossier_resultats = 'BASIAS_resultats/'
-if not os.path.exists(dossier_pages)
-    os.mkdir(dossier_pages)
+if not os.path.exists(dossier_resultats):
+    os.mkdir(dossier_resultats)
 
 
 def nettoyerChamp(string) :

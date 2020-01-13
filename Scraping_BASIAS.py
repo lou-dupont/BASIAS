@@ -37,14 +37,13 @@ def trouverSitesDep(departement) :
 
 # Parallélisation à 10
 pool = ThreadPool(10)
-pool.map(trouverSitesDep, departements)
-
+# pool.map(trouverSitesDep, departements)
 pool.close()
 pool.join()
 
 
-# ### Traitement du descriptif --> 130 Mo
-## Premier fichier récap
+# Traitement du descriptif --> 130 Mo
+# Premier fichier recap
 departements = [f for f in listdir(dossier_departement) if isfile(join(dossier_departement, f))]
 basias_light = []
 
@@ -85,12 +84,12 @@ for region in regions:
         os.mkdir(dossier_pages + region)
 
 def telechargerFichier(fichier) :
-    url = "http://fiches-risques.brgm.fr/georisques/basias-detaillee/" + fichier
+    url = "https://fiches-risques.brgm.fr/georisques/basias-detaillee/" + fichier
     nom_sauvegarde = 'BASIAS_pages/' + fichier[:3] + '/' + fichier + '.html'
     try : 
         urllib.request.urlretrieve(url, nom_sauvegarde)
-    except : 
-        pass
+    except Exception as error:
+        print(error)
 
 # Téléchargement très lent -- la version commentée ci-dessous est plus rapide
 # for region in regions : 
@@ -106,13 +105,13 @@ def telechargerFichier(fichier) :
 
 # # Parallélisation à 10 par seconde, environ 9h :)
 for region in regions : 
-    print('INFO: Traitement de la région %s.' % region)
-    pool = ThreadPool(3)
     indices_reg = [x for x in indices if x[:3] == region]
     dossier_region = dossier_pages + region
     fichiers_sauvegardes = [f for f in listdir(dossier_region) if isfile(join(dossier_region, f))]
     fichiers_manquants = [x for x in indices_reg if x + '.html' not in fichiers_sauvegardes]
-    results = pool.map(telechargerFichier, fichiers_manquants)
-    pool.join()
-    pool.close()
-
+    print('INFO: Traitement de la région %s, %d fichiers manquants.' % (region, len(fichiers_manquants))) 
+    if len(fichiers_manquants) > 0:
+        pool = ThreadPool(10)
+        results = pool.map(telechargerFichier, fichiers_manquants)
+        pool.close()
+        pool.join()
