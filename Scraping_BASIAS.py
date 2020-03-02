@@ -37,7 +37,7 @@ def trouverSitesDep(departement) :
 
 # Parallélisation à 10
 pool = ThreadPool(10)
-# pool.map(trouverSitesDep, departements)
+pool.map(trouverSitesDep, departements)
 pool.close()
 pool.join()
 
@@ -55,7 +55,7 @@ def traiterSiteSimple(site):
     return resultat
 
 for departement in departements : 
-    #print(departement)
+    print(departement)
     with open(dossier_departement + departement, encoding='utf-8') as f:
         json_data = json.load(f)
         propre = [traiterSiteSimple(site) for site in json_data['data']]

@@ -283,6 +283,7 @@ for region in dossiers_regions :
     print(datetime.now())
     with open("BASIAS_resultats/BASIAS_%s.txt" % region, 'w') as f:
         for fichier in fichiers : 
+            print(region + ' ' + fichier)
             f.write(json.dumps(traiterPage(fichier)) + "\n")
     print(datetime.now())
 
